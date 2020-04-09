@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0030)http://192.168.100.1/index.asp -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<link href="./HG8245H_files/common.css" rel="stylesheet" type="text/css">
+<link href="./HG8245H_files/frame.css" rel="stylesheet" type="text/css">
+<script src="./HG8245H_files/jquery.min.js.download" type="text/javascript"></script>
+<script src="./HG8245H_files/util.js.download" type="text/javascript"></script>
+<script src="./HG8245H_files/frame.js.download" type="text/javascript"></script><title>HG8245H</title>
+<script language="JavaScript" type="text/javascript">
+var CfgMode ='COMMON';
+var sysUserType = '0';
+var curUserType = '1';
+var curWebMode = '0';
+
+function changeMode()
+{
+if(curWebMode == '0')
+{
+curWebMode = '1';
+}
+else
+{
+curWebMode = '0';
+}
+
+var Form = new webSubmitForm();
+Form.addParameter('mode', curWebMode);
+Form.setAction('changeMenu.cgi?'+'&RequestFile=index.asp');
+Form.addParameter('x.X_HW_Token', getValue('onttoken'));
+    Form.submit(); 
+}
+</script>
+<title>HUAWEI</title>
+</head>
+<body> 
+<div id="main"> 
+  <div id="header"> 
+<script language="JavaScript" type="text/javascript">
+if ( 'STC' == CfgMode.toUpperCase())
+{
+document.write('<div id="headerLogoImg" style="background: url(../images/banner_logo_stc.gif) no-repeat center; height: 70px; width: 144px;"></div>');
+}
+else if ( 'SONET' == CfgMode.toUpperCase() || 'SONETHG8040H' == CfgMode.toUpperCase() || 'JAPAN8045D' == CfgMode.toUpperCase())
+{
+    document.write('<div id="headerLogoImg" style="background: url(../images/banner_bg.gif) repeat-x center; height: 70px; width: 144px;"></div>');
+}  
+else if ('ORANGEMT' == CfgMode.toUpperCase())
+{
+document.write('<div id="headerLogoImg" style="background: url(../images/banner_MA.gif) repeat-x center; height: 70px; width: 144px;"></div>');
+}
+else if ('NOS' == CfgMode.toUpperCase())
+{
+document.write('<div id="headerLogoImg" style="background: url(../images/banner_nos.gif) repeat-x center; height: 70px; width: 144px;"></div>');
+}
+else if ('PLDT' == CfgMode.toUpperCase())
+{
+document.write('<div id="headerLogoImg" style="background: url(../images/banner_pldt.gif) repeat-x center; height: 70px; width: 144px;"></div>');
+}
+else if ('DIGICEL' == CfgMode.toUpperCase())
+{
+document.write('<div id="headerLogoImg" style="background: url(../images/banner_digicel.gif) repeat-x center; height: 70px; width: 144px;"></div>');
+}
+else if ('GLOBE' == CfgMode.toUpperCase())
+{
+document.write('<div id="headerLogoImg" style="background: url(../images/banner_globe.gif) repeat-x center; height: 70px; width: 144px;"></div>');
+}
+else
+{
+document.write('<div id="headerLogoImg"></div>');
+}
+</script><div id="headerLogoImg"></div>
+    <div id="headerContent"> 
+      <div id="headerInfo"> 
+        <div id="headerTitle">HG8245H</div> 
+        <div id="headerLogout">
+<script language="JavaScript" type="text/javascript">
+if ( ('TDE' == CfgMode.toUpperCase()) && (curUserType == sysUserType))
+{
+document.write('<input style="position:relative;width:100px;height:25px;margin-right:20px;" id="Cmbutton" name="Cmbutton" onClick="changeMode();" type="button" value="Change Mode">'); 
+document.write('<input type="hidden" name="onttoken" id="hwonttoken" value="de81e8305917f2cca92958861936a6c8">');
+}
+else if( ('SLT' == CfgMode.toUpperCase()) && (curUserType != sysUserType))
+{
+var ButtonValue = curWebMode == 0 ? "Detail Setup" : "Quick Setup";
+var html = '<input style="position:relative;width:100px;height:25px;margin-right:20px;" id="Cmbutton" name="Cmbutton" onClick="changeMode();" type="button" value="';
+    html += ButtonValue + '">';
+document.write(html); 
+document.write('<input type="hidden" name="onttoken" id="hwonttoken" value="4d5b9b9e66a1de007986fe987b59bf37">');
+}
+</script>
+<span id="headerLogoutText">Logout</span> </div> 
+      </div> 
+      <div id="headerTab"> 
+        <ul><li value="0" class=""><div class="tabBtnLeft"></div><div class="tabBtnCenter">Status</div><div class="tabBtnRight"></div></li><li value="1" class=""><div class="tabBtnLeft"></div><div class="tabBtnCenter">WAN</div><div class="tabBtnRight"></div></li><li value="2" class=""><div class="tabBtnLeft"></div><div class="tabBtnCenter">LAN</div><div class="tabBtnRight"></div></li><li value="3" class=""><div class="tabBtnLeft"></div><div class="tabBtnCenter">IPv6</div><div class="tabBtnRight"></div></li><li value="4" class=""><div class="tabBtnLeft"></div><div class="tabBtnCenter">WLAN</div><div class="tabBtnRight"></div></li><li value="5" class="hover"><div class="tabBtnLeft"></div><div class="tabBtnCenter">Security</div><div class="tabBtnRight"></div></li><li value="6" class=""><div class="tabBtnLeft"></div><div class="tabBtnCenter">Forward Rules</div><div class="tabBtnRight"></div></li><li value="7" class=""><div class="tabBtnLeft"></div><div class="tabBtnCenter">Network Application</div><div class="tabBtnRight"></div></li><li value="8" class=""><div class="tabBtnLeft"></div><div class="tabBtnCenter">System Tools</div><div class="tabBtnRight"></div></li></ul> 
+      </div> 
+    </div> 
+    <div id="headerSpace">&nbsp;</div> 
+  </div> 
+  <div id="center" style="height: 495px;">
+  <script language="JavaScript" type="text/javascript">
+if ( 'ORANGEMT' == CfgMode.toUpperCase())
+{
+document.write('<div id="nav" class="orangement"> <ul> </ul> </div>'); 
+}
+else
+{
+document.write('<div id="nav" class="others"> <ul> </ul> </div>');
+}
+</script><div id="nav" class="others" style="height: 495px;"> <ul><li value="0" class="hover"><div>Firewall Level Configuration</div></li><li value="1"><div>IP Filter Configuration</div></li><li value="2"><div>MAC Filter Configuration</div></li><li value="3"><div>WLAN MAC Filter Configuration</div></li><li value="4"><div>URL Filter Configuration</div></li><li value="5"><div>DoS Configuration</div></li><li value="6"><div>ONT Access Control Configuration</div></li></ul> </div> 
+    <div id="content" style="height: 495px;"> 
+      <div id="topNav"> <span id="topNavMainMenu">Security</span>&nbsp;&gt;&nbsp;<span id="topNavSubMenu">Firewall Level Configuration</span> </div> 
+      <div id="frameWarpContent" style="height: 470px;"> 
+        <iframe id="frameContent" frameborder="0" height="100%" marginheight="0" marginwidth="0" scrolling="no" width="100%" src="./HG8245H_files/firewalllevel.html" style="height: 470px;"></iframe> 
+      </div> 
+    </div> 
+  </div> 
+  <div id="footer"> 
+    <table border="0" cellpadding="0" cellspacing="0"> 
+      <tbody><tr> 
+  <td align="left" width="20%" nowrap="">
+<script language="JavaScript" type="text/javascript">
+   if ( 'BELL' == CfgMode.toUpperCase()
+   || 'TELUS' == CfgMode.toUpperCase()) 
+   {
+document.write('<a href="/html/management/opensfnotice.asp">Open Source Software Notice</a>');
+   }
+</script>
+  </td>
+  
+<script language="JavaScript" type="text/javascript">        
+if ( 'SONET' != CfgMode.toUpperCase() && 'SONETHG8040H' != CfgMode.toUpperCase() && 'JAPAN8045D' != CfgMode.toUpperCase()) 
+{
+document.write('<td id="footerLogo" width="5%"></td>');
+}
+</script><td id="footerLogo" width="5%"></td>
+        <td id="footerText" nowrap="">Copyright © Huawei Technologies Co., Ltd. 2009-2015. All rights reserved. </td> 
+      </tr> 
+    </tbody></table> 
+  </div> 
+  <div id="fresh"> 
+    <iframe frameborder="0" height="100%" marginheight="0" marginwidth="0" scrolling="no" src="./HG8245H_files/refresh.html" width="100%"></iframe> 
+  </div> 
+</div> 
+
+
+</body></html>

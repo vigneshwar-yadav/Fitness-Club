@@ -1,0 +1,27 @@
+﻿/*
+ *	Common Style
+ *	通用样式表
+ *	Create By yKF32252	
+ */
+* {
+	font-family: Arial;
+	font-size: 12px;
+	color: #000000;
+}
+body {
+	margin: 0px;
+	padding: 0px;
+}
+input.inputText {
+	height: 21px;
+	width: 180px;
+	border: 0px;
+	font-size: 12px;
+	font-family: Tahoma;
+	background: url('../images/login_inupt.gif') transparent no-repeat center;
+}
+input.button {
+	height: 21px;
+	border: 1px solid #C8C8C8;
+	background: url('../images/button_bg.gif') transparent repeat-x center;
+}

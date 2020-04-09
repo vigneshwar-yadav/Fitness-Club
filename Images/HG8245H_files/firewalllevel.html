@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0052)http://192.168.100.1/html/security/firewalllevel.asp -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta http-equiv="Pragma" content="no-cache">
+<link rel="stylesheet" href="./style.css" type="text/css">
+<link rel="stylesheet" href="./bbspdiff.css" type="text/css">
+<script language="JavaScript" src="./util.js(1).download"></script>
+<script language="JavaScript" src="./jsdiff.js.download"></script>
+<script language="JavaScript" src="./tabdes.js.download"></script>
+<title>Firewall Level</title>
+<script language="JavaScript" src="./bbspdes.html"></script>
+<script language="JavaScript" type="text/javascript">
+var FltsecLevelx = 'Custom';
+var FltsecLevel = changechar(FltsecLevelx);
+var CfgModeWord ='COMMON'; 
+var curUserType = '1';
+function IsSonetUser()
+{
+if(('SONET' == CfgModeWord.toUpperCase() || 'JAPAN8045D' == CfgModeWord.toUpperCase())
+        && curUserType != '0')
+{
+return true;
+}
+else
+{
+return false;
+}
+}
+
+function IsOSKNormalUser()
+{
+if (('OSK' == CfgModeWord.toUpperCase()) && (curUserType != '0'))
+{
+return true;
+}
+else
+{
+return false;
+}
+}
+
+function loadlanguage()
+{
+var all = document.getElementsByTagName("td");
+for (var i = 0; i <all.length ; i++) 
+{
+var b = all[i];
+if(b.getAttribute("BindText") == null)
+{
+continue;
+}
+b.innerHTML = firewalllevel_language[b.getAttribute("BindText")];
+}
+}
+
+function changechar(str)
+{
+if(!str)
+{
+return "";
+}
+return str.substring(0,1).toUpperCase()+str.substring(1,10).toLowerCase();
+}
+
+function LoadFrame()
+{
+setSelect("SecurityLevel", FltsecLevel);
+setDisable("SecurityLevel" , ('1' != '0') ? 1 : 0);
+setDisable("btnApply" , ('1' != '0') ? 1 : 0);
+if(IsSonetUser() || IsOSKNormalUser())
+{
+setDisable("SecurityLevel" , 0);
+setDisable("btnApply" , 0);
+}
+loadlanguage();
+}
+
+function SubmitForm()
+{
+    var Form = new webSubmitForm();   
+    Form.addParameter('x.X_HW_FirewallLevel',getValue('SecurityLevel'));
+Form.addParameter('x.X_HW_Token', getValue('onttoken'));
+Form.setAction('set.cgi?x=InternetGatewayDevice.X_HW_Security'+ '&RequestFile=html/security/firewalllevel.asp');
+Form.submit();
+}
+
+function ChangeLevel(level)
+{
+
+}
+
+</script>
+
+</head>
+<body onload="LoadFrame();" class="mainbody" marginwidth="0" marginheight="0">
+
+<form id="ConfigForm">
+
+
+<table width="100%" id="TableSmartFilter">
+<tbody><tr>
+<td class="prompt">
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tbody><tr>
+<td class="title_common" style="padding-left:10px;" bindtext="bbsp_firewalllevel_title">On this page, you can configure the firewall level.</td>
+</tr>
+</tbody></table>
+</td>
+</tr> 
+</tbody></table>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="1" class="tabal_bg"> 
+ <tbody><tr class="tabal_left">
+<td class="width_40p" bindtext="bbsp_currentlevelmh">Current Firewall Level:</td> 
+<td class="width_60p"> 
+<script language="JavaScript">
+    if( undefined != firewalllevel_language[FltsecLevel])
+            {      
+        document.write("&nbsp;&nbsp;"+firewalllevel_language[FltsecLevel]);
+            }
+            else
+            {
+               document.write("&nbsp;&nbsp;"+firewalllevel_language['Custom']);
+            }
+</script>&nbsp;&nbsp;User-defined
+</td> 
+</tr>       
+ <tr class="tabal_left">
+<td class="width_40p" bindtext="bbsp_setlevelmh">Firewall Level:</td>
+<td class="width_60p">
+<select name="SecurityLevel" id="SecurityLevel" disabled="" style="color: rgb(172, 168, 153);">
+<option value="Disable"><script>document.write(firewalllevel_language['Disable']);</script>Disabled
+</option><option value="High"><script>document.write(firewalllevel_language['High']);</script>High
+</option><option value="Medium"><script>document.write(firewalllevel_language['Medium']);</script>Medium
+</option><option value="Low"><script>document.write(firewalllevel_language['Low']);</script>Low
+</option><option value="Custom"><script>document.write(firewalllevel_language['Custom']);</script>User-defined
+</option></select>
+</td>
+</tr>
+</tbody></table>
+
+<table id="OperatorPanel" class="tabal_button" style="width: 100%" cellpadding="0">
+  <tbody><tr>
+  <td class="tabal_submit width_40p"></td>
+  <td class="tabal_submit">
+  <input type="hidden" name="onttoken" id="hwonttoken" value="fad1a6a8fa18b2c3e2c7c2bc20c8a6b0">
+  <button name="btnApply" id="btnApply" type="button" onclick="SubmitForm();" class="submit" disabled="" style="color: rgb(172, 168, 153);"><script>document.write(firewalllevel_language['bbsp_app']);</script>Apply</button>
+  </td>
+
+  </tr>
+  </tbody></table>
+
+</form>
+
+
+
+
+</body></html>

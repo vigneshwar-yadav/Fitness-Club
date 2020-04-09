@@ -1,0 +1,2172 @@
+//测试标识
+var g_testFlag = 1;
+//需要构造数据时,1构造测试数据,0从后台读取数据
+var g_needMakeData = 0;
+/*adjust data type*/
+var TabWidth = "75%";
+function isValidAscii(val)
+{
+    for ( var i = 0 ; i < val.length ; i++ )
+    {
+        var ch = val.charAt(i);
+        if ( ch < ' ' || ch > '~' )
+        {
+            return ch;
+        }
+    }
+    return '';
+}
+
+function isValidCfgStr(cfgName, val, len)
+{
+	if (isValidAscii(val) != '')         
+	{            
+		alert(cfgName + ' has invalid character "' + isValidAscii(val) + '".')          
+		return false;       
+    }
+   if (val.length > len)
+   {
+	   alert(cfgName + ' cannot exceed ' + len  + ' characters.');
+	   return false;
+   }		
+}
+
+function isHexaDigit(digit) {
+   var hexVals = new Array("0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+                           "A", "B", "C", "D", "E", "F", "a", "b", "c", "d", "e", "f");
+   var len = hexVals.length;
+   var i = 0;
+   var ret = false;
+
+   for ( i = 0; i < len; i++ )
+      if ( digit == hexVals[i] ) break;
+
+   if ( i < len )
+      ret = true;
+
+   return ret;
+}
+
+function last8isHexaNumber(number)
+{
+    for (var index = 4; index < number.length; index++)
+    {
+        if (isHexaDigit(number.charAt(index)) == false)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+function isSafeStringExc(compareStr, UnsafeStr)
+{
+	for (var i = 0; i < compareStr.length; i++)
+	{
+		var c = compareStr.charAt(i);
+		if (isValidAscii(c) != '')
+		{
+			 return false;
+	    }
+		else
+		{
+			if (UnsafeStr.indexOf(c) > -1)
+			{
+				return false;
+			}
+		}
+	}
+    return true;
+}
+
+function isSafeStringIn(compareStr, UnsafeStr)
+{
+	for (var i = 0; i < compareStr.length; i++)
+	{
+		var c = compareStr.charAt(i);
+		if (isValidAscii(c) != '')
+		{
+			 return false;
+	    }
+		else
+		{
+			if (UnsafeStr.indexOf(c) == -1)
+			{
+				return false;
+			}
+		}
+	}
+    return true;
+}
+
+function isEndGTEStart(EndIp, StartIp)
+{
+   addrEnd = EndIp.split('.');
+   addrStart = StartIp.split('.');
+   E = parseInt(addrEnd[3],10) + 1;
+   S = parseInt(addrStart[3],10) + 1;
+   if (E < S) 
+      return false;
+   return true;
+}
+
+function ipIsInIP(subStartIp, subEndIp, StartIp, EndIp)
+{
+   addrEnd = EndIp.split('.');
+   addrStart = StartIp.split('.'); 
+   subAddrEnd = subEndIp.split('.');
+   subAddrStart = subStartIp.split('.'); 
+
+   for(i = 0; i < 4; i++)
+   {
+       seg = parseInt(addrEnd[i],10);
+       subSeg = parseInt(subAddrEnd[i],10);
+       if(subSeg > seg)
+          return false;
+
+       seg = parseInt(addrStart[i],10);
+       subSeg = parseInt(subAddrStart[i],10);  
+       if((subSeg > 0) && (subSeg < seg))
+          return false;
+   }
+
+   return true;
+}
+
+function IsSameSubnet(lip,rip)
+{
+	var laddrParts = lip.split('.');
+	var raddrParts = rip.split('.');
+
+	for(i=0; i<3; i++)
+	{
+		if(parseInt(laddrParts[i],10) != parseInt(raddrParts[i],10))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+function IpCompare(Ip1, Ip2, Ip3, Mask1) 
+{
+   lan1a = Ip1.split('.');
+   lan2a = Ip2.split('.');
+   lan1m = Mask1.split('.');
+
+      l1a_n = parseInt(lan1a[3]);     
+      l2a_n = parseInt(lan2a[3]);
+      l1m_n = parseInt(lan1m[3]);
+
+      if (((l1a_n & l1m_n) ? (l1a_n & l1m_n) : l1a_n) > (Ip3)
+          ||(Ip3) > ((l2a_n & l1m_n) ? (l2a_n & l1m_n) : l2a_n))
+      {
+      	return false;
+      }
+   return true;
+}
+// Check if a name valid
+function isValidName(name) 
+{
+   return isSafeStringExc(name,'"<>%\\^[]`\+\$\,=\'#&: \t');
+}
+
+//a valid string do not contain '"' and each char is validAscII
+function isValidString(name) 
+{
+   return isSafeStringExc(name,'"\\');
+}
+
+function isInteger(value)
+{   	
+	if (/^(\+|-)?\d+$/.test(value)) 
+	{
+	   return true;
+	} 
+	else 
+	{
+	    return false;
+	}
+}
+
+function isPlusInteger(value)
+{
+	if (isInteger(value) && parseInt(value) >= 0)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+function isFloat(value)
+{   	
+	if (/^(\+|-)?\d+($|\.\d+$)/.test(value))
+	{
+	   return true;
+	} 
+	else 
+	{
+	   return false;
+	}
+}
+
+function CheckNumber(Value, MinRange, MaxRange)
+{
+    //prevent Hexadecimal or octal
+    if ( Value.length > 1 && Value.charAt(0) == '0' )
+    {
+        return false;
+    }
+    
+    if (false == isInteger(Value))
+    {
+        return false;
+    }
+	
+    var t = parseInt(Value, 10);
+    if (isNaN(t) ==  true)
+    {
+        return false;
+    }
+    
+    if (t < MinRange || t > MaxRange)
+    {
+        return false;
+    }
+    
+    return true;
+}
+
+function isValidCfgInteger(cfgName, val, start, end)
+{
+	   if (isInteger(val) == false)
+	   {
+	       alert(cfgName + ' is invalid, it must be digist.');
+		   return false;
+	   }
+	   var temp = parseInt(val);
+	   if (temp < start || temp > end)
+	   {
+	       alert(cfgName + ' must be greater than ' + start.toString()
+		         + ' and less than ' + end.toString() + '.');
+		   return false;
+	   }	
+}
+
+/*adjust the data of network format*/
+function isValidIpAddress(address) {
+   var i = 0;
+
+   if ( address == '0.0.0.0' ||
+        address == '255.255.255.255' )
+      return false;
+
+   var addrParts = address.split('.');
+   if ( addrParts.length != 4 ) return false;
+   for (i = 0; i < 4; i++) {
+      if (isNaN(addrParts[i]) || addrParts[i] ==""
+          || addrParts[i].charAt(0) == '+' ||  addrParts[i].charAt(0) == '-' )
+         return false;
+      if (addrParts[i].length > 3 || addrParts[i].length < 1)
+      {
+          return false;
+      }
+	  
+	  if (addrParts[i].length > 1 && addrParts[i].charAt(0) == '0')
+      {
+          return false;
+      }
+
+      if (!isInteger(addrParts[i]) || addrParts[i] < 0)
+      {
+          return false;
+      }
+      num = parseInt(addrParts[i]);
+      if (i == 0 && num == 0)
+      {
+          return false;
+      }
+      
+      if ( num < 0 || num > 255 )
+         return false;
+   }
+   return true;
+}
+
+function isBroadcastIp(ipAddress, subnetMask)
+{
+     var maskLenNum = 0;
+     tmpMask = subnetMask.split('.');
+     tmpIp = ipAddress.split('.');
+
+     if((parseInt(tmpIp[0]) > 223) || ( 127 == parseInt(tmpIp[0])))
+     {
+         return true;
+     }
+
+     for(maskLenNum = 0; maskLenNum < 4; maskLenNum++)
+     {
+         if(parseInt(tmpMask[maskLenNum]) < 255)
+            break;         
+     }
+
+     tmpNum0 = parseInt(tmpIp[maskLenNum]);
+     tmpNum1 = 255 - parseInt(tmpMask[maskLenNum]);
+     tmpNum2 = tmpNum0 & tmpNum1;
+     if((tmpNum2 != 0) && (tmpNum2 != tmpNum1))
+     {
+         return false;
+     }
+
+     if(maskLenNum == 3)//掩码最后一位不等于255: 255.255.255.xxx
+     {
+         return true;
+     }
+     else if(maskLenNum == 2)//255.255.xxx.xxx
+     {
+         if(((tmpIp[3] == 0)&&(tmpNum2 == 0))||
+             ((tmpIp[3] == 255)&&(tmpNum2 == tmpNum1)))
+         {
+             return true;
+         }
+     }
+     else if(maskLenNum == 1)//255.xxx.xxx.xxx
+     {
+         if(((tmpNum2 == 0)&&(tmpIp[3] == 0)&&(tmpIp[2] == 0)) ||
+             ((tmpNum2 == tmpNum1)&&(tmpIp[3] == 255)&&(tmpIp[2] == 255)))
+         {
+             return true;
+         }
+     }
+     else if(maskLenNum == 0)//xxx.xxx.xxx.xxx
+     {
+         if(((tmpNum2 == 0)&&(tmpIp[3] == 0)&&(tmpIp[2] == 0)&&(tmpIp[1] == 0)) ||
+             ((tmpNum2 == tmpNum1)&&(tmpIp[3] == 255)&&(tmpIp[2] == 255) &&(tmpIp[1] == 255)))
+         {
+             return true;
+         }
+     }
+
+     return false;
+     
+}
+
+function isAbcIpAddress(address)
+{
+    if (isValidIpAddress(address) == false)
+    {
+        return false;
+    }
+	
+	var addrParts = address.split('.');
+    var num = 0;
+ 
+    num = parseInt(addrParts[0]);
+    if (num < 1 || num >= 224 || num == 127)
+    {
+        return false;
+    }
+	
+    return true;
+}
+
+function isHostIpWithSubnetMask(address, subnet)
+{
+    if (isAbcIpAddress(address) == false)
+    {
+        return false;
+    }
+
+    if (isValidSubnetMask(subnet) == false)
+    {
+    	return false;
+    }
+
+	var addr = IpAddress2DecNum(address);
+    /* BEGIN: Added by c00147909, 2009/2/6  PN: AI8D02757 */
+    var mask = SubnetAddress2DecNum(subnet);
+    /* END:   Added by c00147909, 2009/2/6 */
+    /* 是网段Ip */
+    if (0 == (addr & (~mask)))
+    {
+        return false;
+    }
+
+    /* 是广播Ip */
+    if (isBroadcastIp(address,subnet) == true)
+    {
+       return false;
+    }   
+
+    return true;
+}
+
+function isDeIpAddress(address)
+{
+    if (isValidIpAddress(address) == false)
+    {
+        return false;
+    }
+    
+    var num = 0;
+    var addrParts = address.split('.');
+    if (addrParts.length != 4)
+    {
+        return false;
+    }
+    
+    if (!isInteger(addrParts[0]) || addrParts[0] < 0 )
+    {
+        return false;
+    }
+    num = parseInt(addrParts[0]);
+    if (!(num >= 224 && num <= 247))
+    {
+        return false;
+    }
+
+    for (var i = 1; i <= 3; i++)
+    {
+        if (!isInteger(addrParts[i]) || addrParts[i] < 0)
+        {
+            return false;
+        }
+        num = parseInt(addrParts[i]);
+        if (!(num >= 0 && num <= 255))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function isBroadcastIpAddress(address)
+{
+    if (isValidIpAddress(address) == false)
+    {
+        return false;
+    }
+    
+    var addrParts = address.split('.');
+    if (addrParts[3] == '255')
+    {
+        return true;
+    }
+    return false;
+}
+
+function isLoopIpAddress(address)
+{
+    if (isValidIpAddress(address) == false)
+    {
+        return false;
+    }
+    
+    var addrParts = address.split('.');
+    if (addrParts[0] == '127')
+    {
+        return true;
+    }
+    return false;
+}
+
+function getLeftMostZeroBitPos(num) 
+{
+   var i = 0;
+   var numArr = [128, 64, 32, 16, 8, 4, 2, 1];
+
+   for ( i = 0; i < numArr.length; i++ )
+      if ( (num & numArr[i]) == 0 )
+         return i;
+
+   return numArr.length;
+}
+function getRightMostOneBitPos(num) {
+   var i = 0;
+   var numArr = [1, 2, 4, 8, 16, 32, 64, 128];
+
+   for ( i = 0; i < numArr.length; i++ )
+      if ( ((num & numArr[i]) >> i) == 1 )
+         return (numArr.length - i - 1);
+
+   return -1;
+}
+
+function maskIsAllZero(mask)
+{
+    if ( mask.charAt(0) == '0' && mask.charAt(0) == ':' )
+      return true;
+}
+
+function getV6AddrLeftMostZeroBitPos(num) 
+{
+   var i = 0;
+   var numArr = [0x8000, 0x4000, 0x2000, 0x1000, 0x800, 0x400, 0x200, 0x100, 0x80, 0x40, 0x20, 0x10, 8, 4, 2, 1];
+
+   for ( i = 0; i < numArr.length; i++ )
+      if ( (num & numArr[i]) == 0 )
+         return i;
+
+   return numArr.length;
+}
+
+function getV6AddrRightMostOneBitPos(num) 
+{
+   var i = 0;
+   var numArr = [1, 2, 4, 8, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000];
+
+   for ( i = 0; i < numArr.length; i++ )
+      if ( ((num & numArr[i]) >> i) == 1 )
+         return (numArr.length - i - 1);
+
+   return -1;
+}
+
+function isValidSubnetMask(mask) {
+   var i = 0, num = 0;
+   var zeroBitPos = 0, oneBitPos = 0;
+   var zeroBitExisted = false;
+
+   if ( mask == '0.0.0.0' )
+      return false;
+
+   var maskParts = mask.split('.');
+   if ( maskParts.length != 4 ) return false;
+
+   for (i = 0; i < 4; i++) {
+      if ( isNaN(maskParts[i]) == true || maskParts[i] == "" 
+          || maskParts[i].charAt(0) == '+' ||  maskParts[i].charAt(0) == '-')
+         return false;
+      if (!isInteger(maskParts[i]) || maskParts[i] < 0)
+      {
+          return false;
+      }
+      num = parseInt(maskParts[i]);
+      if ( num < 0 || num > 255 )
+         return false;
+      if ( zeroBitExisted == true && num != 0 )
+         return false;
+      zeroBitPos = getLeftMostZeroBitPos(num);
+      oneBitPos = getRightMostOneBitPos(num);
+      if ( zeroBitPos < oneBitPos )
+         return false;
+      if ( zeroBitPos < 8 )
+         zeroBitExisted = true;
+   }
+
+   return true;
+}
+
+function isValidIPV6SubnetMask(mask) 
+{
+   var i = 0, num = 0;
+   var zeroBitPos = 0, oneBitPos = 0;
+   var zeroBitExisted = false;
+   
+   if (maskIsAllZero(mask))
+   {
+        return false;
+   }
+   
+   var shortMaskParts = mask.split('::');
+   
+   if (shortMaskParts.length >= 3)
+   {
+       return false;
+   }
+   
+   if (shortMaskParts.length == 2)
+   {
+       if (shortMaskParts[1] != '')
+       {
+           return false;
+       } 
+       var maskParts = shortMaskParts[0].split(':');
+       if (maskParts.length >= 8)
+       {
+           return false;
+       } 
+   }
+   
+   //no ::
+   else if (shortMaskParts.length == 1)
+   {
+       var maskParts = shortMaskParts[0].split(':');
+       if (maskParts.length != 8)
+       {
+           return false;
+       }
+   }
+   for (i = 0; i < maskParts.length; i++) 
+   {   
+      if (false ==  IsIPv6AddressUshortValid(maskParts[i]))
+      {
+         return false;
+      }
+      num = parseInt(maskParts[i], 16);
+
+      if ( num < 0 || num > 65535 )
+         return false;
+      if ( zeroBitExisted == true && num != 0 )
+         return false;
+      zeroBitPos = getV6AddrLeftMostZeroBitPos(num);
+      oneBitPos = getV6AddrRightMostOneBitPos(num);
+
+      if ( zeroBitPos < oneBitPos )
+         return false;
+      if ( zeroBitPos < 16 )
+         zeroBitExisted = true;
+   }
+    return true;
+}
+
+function isValidPort(port) 
+{ 
+   if (!isInteger(port) || port < 1 || port > 65535)
+   {
+       return false;
+   }
+   
+   return true;
+}
+
+function isValidPort2(port) 
+{ 
+   if (!isInteger(port) || port < 1 || port > 65535)
+   {
+       if(port == 0)
+       {
+           return true;
+       }
+       return false;
+   }
+   
+   return true;
+}
+
+function isValidPortPair(StartPort,EndPort)
+{
+   if (!isValidPort(StartPort) || !isValidPort(EndPort))
+   {
+       return false;
+   }
+
+   if (parseInt(StartPort) <= parseInt(EndPort) )
+           return false;      
+   
+   return true;
+}
+
+function isMulticastMacAddress(address)
+{
+	var addrParts = address.split(':');
+	if((addrParts[0] == '01')&&(addrParts[1] == '00')&&(addrParts[2] == '5e'))
+	{
+		return false;
+	}
+	
+	return true;
+}
+
+function isValidMacAddress(address) 
+{
+   var c = '';
+   var i = 0, j = 0;
+	
+   if ( address.toLowerCase() == 'ff:ff:ff:ff:ff:ff' )
+   {
+       return false;
+   }
+   
+   //判读MAC地址是不是全0
+   if ( address.toLowerCase() == '00:00:00:00:00:00' )
+   {
+       return false;
+   }
+
+   addrParts = address.split(':');
+   if ( addrParts.length != 6 ) return false;
+
+   for (i = 0; i < 6; i++) 
+   {
+	   
+      if ( addrParts[i] == '' )
+	  {
+         return false;
+	  }
+
+      if ( addrParts[i].length != 2)
+      {
+        return false;
+      }
+
+      if ( addrParts[i].length != 2)
+      {
+         return false;
+      }
+
+      for ( j = 0; j < addrParts[i].length; j++ ) {
+         c = addrParts[i].toLowerCase().charAt(j);
+         if ( (c >= '0' && c <= '9') ||
+              (c >= 'a' && c <= 'f') )
+            continue;
+         else
+            return false;
+      }
+   }
+
+   return true;
+}
+
+function isValidMacAddress1(address) 
+{
+   var c = '';
+   var i = 0, j = 0;
+
+   if ( address.toLowerCase() == 'ff:ff:ff:ff:ff:ff' )
+   {
+       return false;
+   }
+   
+   //判读MAC地址是不是全0
+   if ( address.toLowerCase() == '00:00:00:00:00:00' )
+   {
+       return false;
+   }
+   
+   addrParts = address.split(':');
+   if ( addrParts.length != 6 ) return false;
+
+   for (i = 0; i < 6; i++) {
+      if ( addrParts[i] == '' )
+         return false;
+
+      if ( addrParts[i].length != 2)
+      {
+        return false;
+      }
+
+      if ( addrParts[i].length != 2)
+      {
+         return false;
+      }
+
+      for ( j = 0; j < addrParts[i].length; j++ ) {
+         c = addrParts[i].toLowerCase().charAt(j);
+         if ( (c >= '0' && c <= '9') ||
+              (c >= 'a' && c <= 'f') )
+            continue;
+         else
+            return false;
+      }
+   }
+   return true;
+}
+
+
+function isNtwkSgmtIpAddress(address)
+{
+    if (isValidIpAddress(address) == false)
+    {
+        return false;
+    }
+    
+    var addrParts = address.split('.');
+    if (addrParts[3] == '0')
+    {
+        return true;
+    }
+    return false;
+}
+
+function isSameSubNet(Ip1, Mask1, Ip2, Mask2) 
+{
+   var count = 0;
+   lan1a = Ip1.split('.');
+   lan1m = Mask1.split('.');
+   lan2a = Ip2.split('.');
+   lan2m = Mask2.split('.');
+
+   for (i = 0; i < 4; i++) 
+   {
+      l1a_n = parseInt(lan1a[i]);
+      l1m_n = parseInt(lan1m[i]);
+      l2a_n = parseInt(lan2a[i]);
+      l2m_n = parseInt(lan2m[i]);
+      if ((l1a_n & l1m_n) == (l2a_n & l2m_n))
+         count++;
+   }
+   if (count == 4)
+      return true;
+   else
+      return false;
+}
+
+function checkSpace(str)
+{
+	var len=str.length;
+
+	if(len==0)
+	{
+		return false;
+	}
+	if(str.charAt(0)==' ')
+	{
+		return false;
+	}
+	if(str.charAt(len-1)==' ')
+	{
+		return false;
+	}
+	return true;
+}
+
+function CheckUrlParameter(inputUrl)
+{
+	//check left or right space
+	if(checkSpace(inputUrl)==false)
+	{
+	  return false;
+	}
+	
+	if(inputUrl.indexOf('http://')!=-1)
+	{
+		/*There http://'s in the middle*/
+		if(inputUrl.indexOf('http://')!=0)
+		{
+			return false;
+		}
+		/*Only http://*/
+		if(inputUrl=="http://")
+		{
+			return false;
+		}
+		/*Remove http:// head*/
+		inputUrl=inputUrl.substring(7);
+	}
+	/*The domain name is empty, is that http:/// or /*/
+	if(inputUrl.indexOf('/')==0)
+	{
+		return false;
+	}
+	var CutUrl=inputUrl.split('/');
+	var Domine=CutUrl[0];
+	var ports=Domine.split(':');
+	var len=ports.length;
+	//There are port
+	if(ports.length>1)
+	{
+		//Port is not between 0-65536
+		if((parseInt(ports[len-1],10)>0&&parseInt(ports[len-1],10)<65536)==false)
+		{
+			return false;
+		}
+		//Remove the port
+		Domine=Domine.substring(0,(Domine.length)-1-ports[len-1].length);
+	}
+	
+	
+	//Filter out the ip address of the first 0
+	var i=0;
+	var adds=Domine.split('.');
+	if(adds[0]=='0'&&adds.length==4)
+	{
+		var isip=1;
+		for(var key=1;key<=3;key++)
+		{
+			if(adds[key]<=255 && adds[key]>=0)
+			{
+				continue;
+			}
+			else
+			{
+				isip=0;
+				break;
+			}
+		}
+		if(isip==1)
+		{
+			return false;
+		}
+	}
+	//Remove the url in front of a space
+	while(Domine.indexOf(" ")==0)
+	{
+		Domine=Domine.substring(1);
+	}
+	/*All 0、All F*/
+	if(Domine=='0.0.0.0'||Domine=='255.255.255.255')
+	{
+		return false;
+	}
+	if ((isValidIpAddress(Domine) == true))
+	{			
+		var addrs=Domine.split('.');
+		/*Multicast address*/
+		if(parseInt(addrs[0],10)>=224)
+		{
+			return false; 
+		}
+		/*Loopback address*/
+		if(Domine=='127.0.0.1')
+		{
+			return false;
+		}
+		/*Network Address*/
+		if(addrs[3]=='0')
+		{
+			return false; 
+		}
+	}
+	return true;
+	
+}
+
+function isNull( str )
+{
+	if ( str == "" ) return true;
+	var regu = "^[ ]+$";
+	var re = new RegExp(regu);
+	return re.test(str);
+}
+
+function IsUrlValid(_Url)
+{
+	if(true == isNull(_Url))
+	{
+		return false;
+	}
+	var Url = new String(_Url.toLocaleLowerCase().replace("http://",""));
+	var ExitColon = false;
+	var ColonLocation = 0;
+	var ColorReg = new RegExp(".*[a-zA-Z0-9]+:[0-9]+/*");
+
+	var ArrayOfUrl = Url.split("//");
+
+	if(ArrayOfUrl[0].toUpperCase() == "FTP:" || ArrayOfUrl[0].toUpperCase() == "HTTPS:")
+	{
+		return false;
+	}
+	if (ArrayOfUrl.length >= 2)
+	{
+		Url = ArrayOfUrl[1];
+	}
+
+	if (Url.length == 0)
+	{
+		return false;
+	}
+
+	ColonLocation = Url.indexOf(":", 0);
+	if (ColonLocation == 0)
+	{
+		return false;
+	}
+
+	ExitColon = ColonLocation > 0 ? true : false;
+
+	if (ExitColon == false)
+	{
+		return true;
+	}
+
+	return ColorReg.test(Url);
+}
+
+/////////////////////////////////////////////////
+
+//将IP地址转换为十进制整数
+function IpAddress2DecNum(address)
+{
+    if (isValidIpAddress(address) == false)
+    {
+        return -1;
+    }
+    var addrParts = address.split('.');
+    var num = 0;
+    for (i = 0; i < 4; i++)
+    {
+        num += parseInt(addrParts[i]) * Math.pow(256, 3 - i);
+    }
+    return num;
+}
+/* BEGIN: Added by c00147909, 2009/2/6  PN: AI8D02757 */
+//将subnet地址转换为十进制整数
+function SubnetAddress2DecNum(address)
+{
+    if (isValidSubnetMask(address) == false)
+    {
+        return -1;
+    }
+    var addrParts = address.split('.');
+    var num = 0;
+    for (i = 0; i < 4; i++)
+    {
+        num += parseInt(addrParts[i]) * Math.pow(256, 3 - i);
+    }
+    return num;
+}
+
+function MacAddress2DecNum(address)
+{
+    if (isValidMacAddress(address) == false)
+    {
+        return -1;
+    }
+    var addrParts = address.split(':');
+    var num = 0;
+    for (i = 0; i < 6; i++)
+    {
+        num += parseInt(addrParts[i],16) * Math.pow(256, 5 - i);
+    }
+    return num;
+}
+
+/* END:   Added by c00147909, 2009/2/6 */
+//web Element 
+/*get element by name or id*/
+function getElById(sId)
+{
+	return getElement(sId);
+}
+
+function getElementById(sId)
+{
+	if (document.getElementById)
+	{
+		return document.getElementById(sId);	
+	}
+	else if (document.all)
+	{
+		// old IE
+		return document.all(sId);
+	}
+	else if (document.layers)
+	{
+		// Netscape 4
+		return document.layers[sId];
+	}
+	else
+	{
+		return null;
+	}
+}
+
+/*getElByName*/
+function getElementByName(sId)
+{    // standard
+	if (document.getElementsByName)
+	{
+		var element = document.getElementsByName(sId);
+		
+		if (element.length == 0)
+		{
+			return null;
+		}
+		else if (element.length == 1)
+		{
+			return 	element[0];
+		}
+		
+		return element;		
+	}
+}
+
+function getElement(sId)
+{
+	 var ele = getElementByName(sId); 
+	 if (ele == null)
+	 {
+		 return getElementById(sId);
+	 }
+	 return ele;
+}
+
+function getOptionIndex(sId,sValue)
+{
+	var selObj = getElement(sId);
+	if (selObj == null)
+	{
+		return -1;
+	}
+	
+	for (i = 0; i < selObj.length; i++)
+	{
+		if (selObj.options[i].value == sValue)
+		{
+			return i;
+		}
+	}
+	
+	return -1;
+}
+
+/*----------------getLength-----------------*/
+function getValue(sId)
+{
+	var item;
+	if (null == (item = getElement(sId)))
+	{
+		debug(sId + " is not existed" );
+		return -1;
+	}
+
+	return item.value;
+}
+
+
+/* Web page manipulation functions */
+function setDisplay (sId, sh)
+{
+    var status;
+    if (sh > 0) 
+	{
+        status = "";
+    }
+    else 
+	{
+        status = "none";
+    }
+	var item = getElement(sId);
+	if (null != item)
+	{
+		getElement(sId).style.display = status;
+	}
+}
+
+function setVisible(sId, sh)
+{
+    var status;
+    if (sh > 0) 
+	{
+        status = "visible";
+    }
+    else 
+	{
+        status = "hidden"
+    }
+    var item = getElement(sId);
+	if (null != item)
+	{
+		getElement(sId).style.visibility = status;
+	}
+}
+
+function setSelect(sId, sValue)
+{
+	var item;
+	if (null == (item = getElement(sId)))
+	{
+		debug(sId + " is not existed" );
+		return false;
+	}
+	
+	for (var i = 0; i < item.options.length; i++) 
+	{
+        if (item.options[i].value == sValue)
+		{
+
+        	item.selectedIndex = i;
+        	return true;
+        }
+    }
+
+    debug("the option which value is " + sValue + " is not existed in " + sId);
+    return false;
+}
+
+function TextTranslate(sValue)
+{
+    if (null != sValue)
+    {
+		sValue = sValue.toString().replace(/&nbsp;/g," ");
+		sValue = sValue.toString().replace(/&quot;/g,"\"");
+		sValue = sValue.toString().replace(/&gt;/g,">");
+		sValue = sValue.toString().replace(/&lt;/g,"<");
+		sValue = sValue.toString().replace(/&#39;/g, "\'");
+		sValue = sValue.toString().replace(/&#40;/g, "\(");
+		sValue = sValue.toString().replace(/&#41;/g, "\)");
+		sValue = sValue.toString().replace(/&amp;/g,"&");	
+    }
+    return sValue;
+}
+function setText (sId, sValue)
+{
+	var item;
+	if (null == (item = getElement(sId)))
+	{
+		debug(sId + " is not existed" );
+		return false;
+	}
+    
+	if(null != sValue)
+	{
+		sValue = sValue.toString().replace(/&nbsp;/g," ");
+		sValue = sValue.toString().replace(/&quot;/g,"\"");
+		sValue = sValue.toString().replace(/&gt;/g,">");
+		sValue = sValue.toString().replace(/&lt;/g,"<");
+		sValue = sValue.toString().replace(/&#39;/g, "\'");
+		sValue = sValue.toString().replace(/&#40;/g, "\(");
+		sValue = sValue.toString().replace(/&#41;/g, "\)");
+		sValue = sValue.toString().replace(/&amp;/g,"&");
+	}
+	item.value = sValue;
+	return true;
+}
+
+
+function setCheck(sId, value)
+{
+	var item;
+	if (null == (item = getElement(sId)))
+	{
+		debug(sId + " is not existed" );
+		return false;
+	}
+	
+    if ( value == '1' ) 
+	{    
+       item.checked = true;
+    }
+	else
+	{
+       item.checked = false;
+    }
+
+    return true;
+}
+
+function setRadio(sId, sValue)
+{
+	var item;
+	if (null == (item = getElement(sId)))
+	{
+		debug(sId + " is not existed" );
+		return false;
+	}
+	
+	for (i=0; i<item.length; i++)
+	{
+		if (item[i].value == sValue) 
+		{
+			item[i].checked = true;
+			return true;
+		}
+    }
+
+    debug("the option which value is " + sValue + " is not existed in " + sId);
+    return false;
+}
+
+function getDivInnerId(divID)
+{
+    var nameStartPos = -1;
+    var nameEndPos = -1;
+    var ele;
+
+    divHTML = getElement(divID).innerHTML;
+    nameStartPos = divHTML.indexOf("name=");
+    nameEndPos   = divHTML.indexOf(' ', nameStartPos);
+    if(nameEndPos <= 0)
+    {
+        nameEndPos = divHTML.indexOf(">", nameStartPos);
+    }
+    
+    try
+    {
+        ele = eval(divHTML.substring(nameStartPos+3, nameEndPos));
+    }
+    catch (e)
+    {
+        ele = divHTML.substring(nameStartPos+3, nameEndPos);
+    }
+    return ele;
+}
+
+function setDisable(sId, flag)
+{
+	var item;
+	if (null == (item = getElement(sId)))
+	{
+		debug(sId + " is not existed" );
+		return false;
+	}
+
+    if ( typeof(item.disabled) == 'undefined' )
+    {
+        if ( item.tagName == "DIV" || item.tagName == "div" )
+        {
+            var ele = getDivInnerId(sId);            
+            setDisable(ele, flag);
+        }
+    }
+    else
+    {
+        if ( flag == 1 || flag == '1' ) 
+        {
+             item.disabled = true;
+			 item.style.color = '#ACA899';
+        }
+        else
+        {
+             item.disabled = false;
+			 item.style.color = '#000000';
+        }     
+    }
+    
+    return true;
+}
+
+function getCheckVal(sId)
+{
+	var item;
+	if (null == (item = getElement(sId)))
+	{
+		debug(sId + " is not existed" );
+		return -1;
+	}
+	if (item.checked == true)
+	{
+		return 1;
+	}
+
+	else
+	{
+		return 0;
+	}
+}
+
+function getRadioVal(sId)
+{
+	var item;
+	if (null == (item = getElement(sId)))
+	{
+		debug(sId + " is not existed" );
+		return -1;
+	}
+	
+	for (i = 0; i < item.length; i++)
+	{
+		if (item[i].checked == true)
+		{
+		   return item[i].value;
+		}
+	}
+	
+	return -1;
+}
+
+function getSelectVal(sId)
+{
+   return getValue(sId);
+}
+
+
+
+
+/*-----select------*/
+function addOption(sId,OptionName,OptionValue,OptionText)
+{	
+	var Param = document.createElement("option");
+	Param.setAttribute('name',OptionName);
+	Param.setAttribute('value',OptionValue);
+	Param.innerHTML = OptionText;
+	
+	var selItem;
+    if ((selItem = getElement(sId)) != null)
+	{			
+		selItem.appendChild(Param);		
+		return Param;
+	}
+	else
+	{
+        debug(sId + " is not existed" );
+		return null;
+	}
+}
+
+function removeOption(sId,sValue)
+{
+	var selItem;
+	if ((selItem = getElement(sId)) != null)
+	{
+		var index = getOptionIndex(sId,sValue);
+		if (index >= 0)
+		{
+
+			selItem.removeChild(selItem.options[index]);
+			return true;
+		}
+        else
+        {
+            debug("the option which value is " + sValue + " is not existed" );
+            return false;
+        }
+	}
+	
+	debug(sId + " is not existed" );
+	return false;
+}
+
+function removeAllOption(sId)
+{
+	var selItem;
+	if ((selItem = getElement(sId)) != null)
+	{
+		selItem.length = 0;	
+		return true;
+	}
+ 
+	debug(sId + " is not existed" );
+	return false;
+}
+
+/////////////////////////////////////////////////////
+// Load / submit functions
+function webSubmitForm(sFormName, DomainNamePrefix)
+{
+    /*-----------------------internal method------------------------*/
+    this.setPrefix = function(Prefix)
+    {
+		if (Prefix == null)
+		{
+			this.DomainNamePrefix = '.';
+		}
+		else
+		{
+			this.DomainNamePrefix = Prefix + '.';
+		}
+	}
+	
+	this.getDomainName = function(sName){
+		if (this.DomainNamePrefix == '.')
+		{
+		    return sName;
+		}
+		else
+		{
+		    return this.DomainNamePrefix + sName;
+		}
+	}
+	
+    this.getNewSubmitForm = function()
+	{
+		var submitForm = document.createElement("FORM");
+		document.body.appendChild(submitForm);
+		submitForm.method = "POST";
+		return submitForm;
+	}
+	
+	this.createNewFormElement = function (elementName, elementValue){
+	    var newElement = document.createElement('INPUT');
+		newElement.setAttribute('name',elementName);
+		newElement.setAttribute('value',elementValue);
+		newElement.setAttribute('type','hidden');
+		return newElement;
+	}
+	
+	/*---------------------------external method----------------------------*/
+	this.addForm = function(sFormName,DomainNamePrefix){
+	    this.setPrefix(DomainNamePrefix);
+	    var srcForm = getElement(sFormName);
+		if (srcForm != null && srcForm.length > 0 && this.oForm != null 
+			&& srcForm.style.display != 'none')
+		{
+			MakeCheckBoxValue(srcForm);
+			
+			for(i=0; i < srcForm.elements.length; i++)
+			{  
+			     var type = srcForm.elements[i].type;
+			     if (type != 'button' && srcForm.elements[i].disabled == false)
+				 {				
+					 if (this.DomainNamePrefix != '.')
+					 {
+						 var ele = this.createNewFormElement(this.DomainNamePrefix 
+												              + srcForm.elements[i].name,
+												              srcForm.elements[i].value);	
+						 this.oForm.appendChild(ele);
+					 }	   
+					 else
+					 {
+						var ele = this.createNewFormElement(srcForm.elements[i].name,
+												             srcForm.elements[i].value
+															  );
+						this.oForm.appendChild(ele);
+					 }	 
+				 }
+			 }
+		}
+		else
+		{
+			this.status = false;
+		}
+		
+		this.DomainNamePrefix = '.';
+	}
+    
+	this.addDiv = function(sDivName,Prefix)
+	{
+		if (Prefix == null)
+		{
+			Prefix = '';
+		}
+		else
+		{
+			Prefix += '.';
+		}
+		
+		var srcDiv = getElement(sDivName);	
+		if (srcDiv == null)
+		{
+			debug(sDivName + ' is not existed!')
+			return;
+		}
+		if (srcDiv.style.display == 'none')
+		{
+			return;
+		}
+
+		var eleSelect = srcDiv.getElementsByTagName("select");
+		if (eleSelect != null)
+	    {
+			for (k = 0; k < eleSelect.length; k++)
+			{
+				if (eleSelect[k].disabled == false)
+				{
+					this.addParameter(Prefix+eleSelect[k].name,eleSelect[k].value)
+				}
+			}
+		}
+		
+		MakeCheckBoxValue(srcDiv);
+		var eleInput = srcDiv.getElementsByTagName("input");
+		if (eleInput != null)
+	    {
+			for (k = 0; k < eleInput.length; k++)
+			{
+				if (eleInput[k].type != 'button' && eleInput[k].disabled == false)
+				{
+				    this.addParameter(Prefix+eleInput[k].name,eleInput[k].value)
+				}
+			}	
+		}
+	}
+	
+	this.addParameter = function(sName, sValue){
+		//检查是否存在这个元素
+		var DomainName = this.getDomainName(sName);
+		
+		for(i=0; i < this.oForm.elements.length; i++) 
+		{
+			if(this.oForm.elements[i].name == DomainName)
+			{
+				this.oForm.elements[i].value = sValue;
+				this.oForm.elements[i].disabled = false;
+				return;
+			}
+		}
+	
+		//没有发现这个元素
+		if(i == this.oForm.elements.length) 
+		{	
+			var ele = this.createNewFormElement(DomainName,sValue);	
+			this.oForm.appendChild(ele);
+		}
+	}
+	
+    this.disableElement = function(sName){	
+	    var DomainName = this.getDomainName(sName);		
+		for(i=0; i < this.oForm.elements.length; i++) 
+		{
+			if(this.oForm.elements[i].name == DomainName)
+			{
+				this.oForm.elements[i].disabled = true;
+				return;
+			}
+		}
+	}
+	
+    this.usingPrefix = function(Prefix){
+	     this.DomainNamePrefix = Prefix + '.';
+	}
+	
+    this.endPrefix = function(){
+	     this.DomainNamePrefix = '.';
+	}
+	
+	this.setMethod = function(sMethod) {
+		if(sMethod.toUpperCase() == "GET")
+			this.oForm.method = "GET";
+		else
+			this.oForm.method = "POST";
+	};
+
+	this.setAction = function(sUrl) {
+		this.oForm.action = sUrl;
+	}
+
+	this.setTarget = function(sTarget) {
+		this.oForm.target = sTarget;
+	};
+
+	this.submit = function(sURL, sMethod) {
+		if( sURL != null && sURL != "" ) this.setAction(sURL);
+		if( sMethod != null && sMethod!= "" ) this.setMethod(sMethod);
+		
+		if (this.status == true)
+		    this.oForm.submit();
+	};
+	
+	this.status = true;
+
+
+	/*--------------------------------excute by internal-------------------------*/
+	this.setPrefix(DomainNamePrefix);
+	this.oForm = this.getNewSubmitForm();
+	if (sFormName != null && sFormName != '')
+	{
+		this.addForm(sFormName,this.DomainNamePrefix);
+	}
+}
+
+function MakeCheckBoxValue(srcForm)
+{
+	var Inputs = srcForm.getElementsByTagName("input");
+	for (var i = 0; i < Inputs.length; i++) 
+	{
+		if (Inputs[i].type == "checkbox")
+		{
+			var CheckBox = getElement(Inputs[i].name);
+			if (CheckBox.checked == true)
+			{
+				CheckBox.value = 1;
+			}
+			else
+			{
+				CheckBox.value = 0;
+			}
+		}
+		else if (Inputs[i].type == "radio")
+		{
+			var radio = getElement(Inputs[i].name);
+	        for (k = 0; k < radio.length; k++)
+			{
+				if (radio[k].checked == false)
+				{
+				    radio[k].disabled = true;
+				}				
+			}
+		}
+	}
+}
+
+
+function Submit(type)
+{
+    if (CheckForm(type) == true)
+	{
+	    var Form = new webSubmitForm();
+	    AddSubmitParam(Form,type);		
+        Form.addParameter('x.X_HW_Token', getValue('onttoken'));		
+		Form.submit();
+	}
+}
+
+////////////////////////////////////////////////////
+function FinishLoad()
+{
+}
+
+function DoUnload()
+{
+}
+
+function DoLogout()
+{
+}
+
+//创建XMLHttp对象
+function CreateXMLHttp()
+{	
+     var xmlhttp = null;
+     var aVersions = ["MSXML2.XMLHttp.5.0","MSXML2.XMLHttp.4.0","MSXML2.XMLHttp.3.0",      
+                      "MSXML2.XMLHttp","Microsoft.XMLHttp"];
+
+     if(window.XMLHttpRequest)
+     { 
+         try 
+         {
+             xmlhttp = new XMLHttpRequest();
+         }
+         catch (e)
+         {
+         }
+     }
+     else 
+     {
+         if(window.ActiveXObject)//IE6、IE5
+         {     
+             for (var i=0; i<5; i++)   
+             {
+                  try
+                  {          
+                       xmlhttp = new ActiveXObject(aVersions[i]);
+                       return xmlhttp;
+                  }
+                  catch (e)
+                  {
+                  }
+             }
+          }
+     } 
+
+
+     return xmlhttp;
+}
+
+
+/////////////////////////////////////
+function AssociateParam(dest,src,name)
+{
+   var DestObj = eval(dest);
+   var SrcObj = eval(src);
+   var NameArray = name.split('|');
+   
+   for (j = 0; j < DestObj.length; j++)
+   {
+	  if (DestObj[j] == null)
+	     break;
+	  for (i = 0; i < SrcObj.length; i++)
+	  {
+		if (SrcObj[i] == null)
+	        break;
+		if (DestObj[j].key.indexOf(SrcObj[i].key) > -1)
+		{
+			try 
+		    {
+				eval(dest + '[' + j + ']' + '.' + 'Relating' + '='
+		             + src + '[' + i + ']');
+			}
+			catch (e)
+			{
+			}
+			 for (k = 0; k < NameArray.length; k++)
+            {   
+			     if (NameArray[k] == '')
+				 {
+					 continue;
+				 }
+				 
+	        	 try
+				 {
+					 eval(dest + '[' + j + ']' + '.' + NameArray[k] + '='
+			           + src + '[' + i + ']' + '.' + NameArray[k]);
+				 }
+				 catch (e)
+				 {
+				 }
+		    }
+			break;
+	 	}
+	  }
+   }
+ 
+}
+
+function toBreakWord(val,lineLength)
+{
+   var content = '';
+   var index = 0;
+   var len = val.length;
+   
+   while (len > lineLength)
+   {
+	  content += val.substr(index,lineLength) + '<br>';   
+	  len -= lineLength;
+	  index += lineLength;
+   }
+   content += val.substr(index);    
+   
+   return content; 
+}
+
+function getBoolValue(param)
+{
+    var value = parseInt(param);
+    if (isNaN(value) == true )
+    {
+       var LowerParam = param.toLowerCase();
+       if (LowerParam == 'enable')
+       {
+          return 1;
+       }
+       else
+       {
+          return 0;
+       }
+    }
+    else
+    {
+       return value;
+    }
+}
+
+function debug(info)
+{
+}
+
+/* BEGIN: Added by liyijie00134923, 2008/12/24   问题单号:AI8D02164*/
+function isMaskOf24BitOrMore(mask)
+{
+    var i = 0, num = 0;
+    if(false == isValidSubnetMask(mask))
+    {
+        return false;
+    }
+    var maskParts = mask.split('.');
+    for(i = 0;i < 3;i++)
+    {
+        num = parseInt(maskParts[i]);
+        if(num != 255)
+            return false;
+    }
+    return true;
+}
+
+function ipInSubnet(ip,subnetStart,subnetEnd)
+{
+    var ipDec;
+    var subnetStartDec;
+    var subnetEndDec;
+   
+    ipDec = IpAddress2DecNum(ip);
+    /* BEGIN: Added by c00147909, 2009/2/6  PN: AI8D02757*/
+    subnetStartDec = SubnetAddress2DecNum(subnetStart);
+    subnetEndDec = SubnetAddress2DecNum(subnetEnd);
+    /* END:   Added by c00147909, 2009/2/6 */
+   if((ipDec >= subnetStartDec) && (ipDec <= subnetEndDec )) 
+    {
+        return true;
+    }
+
+    return false;
+}
+function netmaskIsContinue(Mask)
+{
+    var ulmask;
+    var i;
+    var ulTmp = 0xffffffff;
+    /* BEGIN: Added by c00147909, 2009/2/6  PN: AI8D02757 */
+    ulmask = SubnetAddress2DecNum(Mask);
+    /* END:   Added by c00147909, 2009/2/6 */
+    for (i = 0; i < 32; i++)
+    {
+        if (ulTmp == ulmask)
+        {
+            return 0;
+        }
+        
+        ulTmp <<= 1 ;
+    }
+    
+    return 1;
+}
+
+function getmaskLength(Mask)
+{
+
+    var ulTmp;
+    var ulCount = 0;
+    var ulmask;
+    ulTmp = IP_NetmaskIsContinue(Mask);
+    /* BEGIN: Added by c00147909, 2009/2/6  PN: AI8D02757 */
+    ulmask = SubnetAddress2DecNum(Mask);
+    /* END:   Added by c00147909, 2009/2/6 */
+    if (ulTmp)
+    {
+        return 0;    /* 掩码不连续 */
+    }
+    
+    while (ulmask != 0)
+    {
+        ulmask = ulmask << 1;
+        ulCount++;
+    }
+    return ulCount;
+}
+
+function removeSpaceTrim(inputStr)
+{
+   var inputStrTemp;
+   var i,j = 0;
+
+   if(inputStr == "")
+   {
+      return "";
+   }
+   
+   for(i=0;i<inputStr.length;i++)
+   	{
+   	   if(inputStr.charAt(i) == ' ')
+   	   {
+   	   	   continue;
+   	   }
+	   else
+	   {
+	       break;
+	   }
+   	}
+
+    inputStrTemp = inputStr.substr(i,inputStr.length-i);
+
+	if(inputStrTemp == "")
+	{
+	   return "";
+	}
+
+	for(i=inputStrTemp.length-1;i>=0;i--)
+	{
+		if(inputStrTemp.charAt(i) == ' ')
+		{
+		    j++;
+			continue;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	inputStrTemp = inputStrTemp.substr(0,inputStrTemp.length-j);
+
+	return inputStrTemp;
+	
+}
+
+function XmlHttpSendAspFlieWithoutResponse(FileName)
+{
+	var xmlHttp = null;
+
+	if(null == FileName
+	   || FileName == "")
+	{
+		return false;
+	}
+	
+	if(window.XMLHttpRequest) {
+		xmlHttp = new XMLHttpRequest();
+	} else if(window.ActiveXObject) {
+		xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+	}
+    
+    xmlHttp.open("GET", FileName, false);
+	xmlHttp.send(null);
+}
+/* END:   Added by liyijie00134923, 2008/12/24 */
+/* check ip address invalid or not(ipv4&ipv6 address are supported)? */
+function CheckIpAddressValid(ipAddr)
+{
+    if ( ipAddr != '' && (isValidIpAddress(ipAddr) == false || isAbcIpAddress(ipAddr) == false))
+    {
+        if(IsIPv6AddressValid(ipAddr) == false)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+/* check the domain name invalid or not? */
+function CheckDomainName(domainName)
+{		
+    if(domainName != '')
+    {   
+    	var adr  = domainName;		
+    	var arr  = domainName.split(".");	
+    	var i=0;
+    	var j=0;
+    	
+    	if (adr.length >= 256)
+    	{
+    	    return false;
+    	}
+    	
+    	if( (adr.charAt(adr.length -1) == '.' ) || (adr.charAt(0) == '.'))
+    	{
+    	    return false;
+    	}
+    	
+    	for(i=0;i<adr.length;i++)
+    	{
+            if( ((adr.charAt(i) =='.') && (adr.charAt(i+1) =='.')))
+            {	
+                return false;
+            }
+    	}
+    	
+    	for(i=0;i<arr.length;i++)
+    	{
+            if (arr[i].length > 63)
+            {
+                return false;
+            }
+            for(j=0;j<arr[i].length;j++)
+            {	 
+                if( !((arr[i].charAt(j)>='A' && arr[i].charAt(j)<='Z') || (arr[i].charAt(j)>='a' && arr[i].charAt(j)<='z') || (arr[i].charAt(j)>='0' && arr[i].charAt(j)<='9') || (arr[i].charAt(j)=='-')) )
+                {	
+                    return false;
+                }
+            }								
+    	}
+    	
+        if( (arr[arr.length-1].charAt(arr[arr.length-1].length -1)== '-') || (arr[arr.length-1].charAt(arr[arr.length-1].length -1)== '.' ) || (arr[0].charAt(0)== '.'))
+        {
+            return false;
+        }
+    }
+    
+    return true;		
+}
+/* check the string is ip address or domain name? */
+function CheckIsIpOrNot(ipOrDomainStr)
+{
+    var ch = ipOrDomainStr.charAt(0);
+    /* ipv4 or ipv6? */
+    if( (ch <= '9' && ch >= '0') || (-1 != ipOrDomainStr.indexOf(":")) )
+    {
+        return true;
+    }
+    
+    return false;
+}
+/* the function check the "ipOrDomainStr" string is vaild ip or domain.
+   It's so smart that he can distinguish ip address or domain name by your input,
+   and do related checks with different string type.
+   by z00213358 / 2012.10
+ */
+function CheckIpOrDomainIsValid(ipOrDomainStr)
+{
+    if( true == CheckIsIpOrNot(ipOrDomainStr) )
+    {
+        if(false == CheckIpAddressValid(ipOrDomainStr))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        if (false == CheckDomainName(ipOrDomainStr))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+function isSpecialCharacterInString(str)
+{
+	var specia_Reg =/^.*[`~!@#\$%\^&\*\(\)_\+\-=\[\]\{\}\'\;\,\./:\"\?><\\\| ]{1,}.*$/;
+	var MyReg = new RegExp(specia_Reg);
+	if ( MyReg.test(str) )
+	{	
+		return true;
+	}
+  	return false;
+}
+
+function isDigitInString(str)
+{
+	var digit_reg = /^.*([0-9])+.*$/;
+	var MyReg = new RegExp(digit_reg);
+	if ( MyReg.test(str) )
+	{	
+		return true;
+	}
+	return false;
+}
+
+function isUppercaseInString(str)
+{
+		var upper_reg = /^.*([A-Z])+.*$/;
+		var MyReg = new RegExp(upper_reg);
+		if ( MyReg.test(str) )
+		{	
+			return true;
+		}
+		return false;
+}
+
+function isLowercaseInString(str)
+{
+		var lower_reg = /^.*([a-z])+.*$/;
+		var MyReg = new RegExp(lower_reg);
+		if ( MyReg.test(str) )
+		{	
+			return true;
+		}
+		return false;
+}
+
+function CompareString(srcstr,deststr)
+{
+	var reverestr=(srcstr.split("").reverse().join(""));
+	if ( srcstr == deststr )
+	{
+		return false;
+	}
+	
+	if (reverestr == deststr )
+	{
+		return false;
+	}
+	return true;
+}
+
+function GetStringContent(str, Length)
+{
+    if (str.length > Length)
+    {
+		
+		str = str.toString().replace(/&nbsp;/g," ");
+		str = str.toString().replace(/&quot;/g,"\"");
+		str = str.toString().replace(/&gt;/g,">");
+		str = str.toString().replace(/&lt;/g,"<");
+		str = str.toString().replace(/&#39;/g, "\'");
+		str = str.toString().replace(/&#40;/g, "\(");
+		str = str.toString().replace(/&#41;/g, "\)");
+		str = str.toString().replace(/&amp;/g,"&");
+
+		var strNewLength = str.length;
+		if(strNewLength > Length )
+		{
+			str=str.substr(0, Length) + "......";
+		}
+		else
+		{
+			str=str.substr(0, Length);
+		}
+		str = str.toString().replace(/&/g,"&amp;");
+		str = str.toString().replace(/>/g,"&gt;");
+		str = str.toString().replace(/</g,"&lt;");
+		str = str.toString().replace(/ /g,"&nbsp;");
+		return str;
+    }
+    str = str.toString().replace(/ /g,"&nbsp;");
+    return str;
+}
+
+function ShowNewRow(oldstring)
+{
+	var newstring = '';
+	var LineLength = 200;
+	for (j = 0; j < parseInt((oldstring.length)/LineLength); j++)
+	{
+		newstring += oldstring.substr(LineLength*j,LineLength*(j+1)) + ' ';
+	}
+	newstring +=  oldstring.substr(LineLength*j,oldstring.length);
+	return newstring;
+}
